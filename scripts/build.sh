@@ -1,14 +1,10 @@
 #!/bin/bash
 # Builds build/Poof.app (release, sandboxed, hardened runtime).
-# Signs with this Mac's "AA Local Code Signing" identity when it exists (~/.dotfiles/setup/codesign-identity.sh):
-# same signature every build, so macOS keeps the Accessibility grant. Else ad-hoc (grant resets each build).
-# Override: SIGN_ID="Other Identity" ./scripts/build.sh
+# Ad-hoc signed: Poof needs no permission (no TCC grant to keep across builds), so no certificate is needed.
+# Override: SIGN_ID="Developer ID Application: …" ./scripts/build.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if [ -z "${SIGN_ID:-}" ]; then
-  SIGN_ID=-
-  security find-certificate -c "AA Local Code Signing" > /dev/null 2>&1 && SIGN_ID="AA Local Code Signing"
-fi
+SIGN_ID="${SIGN_ID:--}"
 swift build -c release
 BIN="$(swift build -c release --show-bin-path)/Poof"
 if [ ! -f Resources/AppIcon.icns ]; then

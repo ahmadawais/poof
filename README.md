@@ -30,8 +30,9 @@ git clone https://github.com/ahmadawais/poof.git && cd poof
 ./scripts/test.sh      # Swift Testing suite
 ```
 
-Signs with a local identity named "AA Local Code Signing" when present, else ad-hoc (`SIGN_ID=… ./scripts/build.sh`
-to choose another).
+No Apple Developer account or certificate needed: the build is ad-hoc signed on your Mac, and since Poof asks for
+no permissions there is no grant to lose when you rebuild. Built locally, it isn't quarantined, so Gatekeeper
+doesn't block it either. (`SIGN_ID="Developer ID Application: …" ./scripts/build.sh` if you want to sign it.)
 
 ## License
 
