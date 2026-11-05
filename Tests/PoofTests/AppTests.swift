@@ -57,12 +57,13 @@ extension SharedState {
     struct PrefsTests {
         init() { Env.prefs() }
 
-        @Test("Defaults: idle hide on after 3 s, show on move, menu icon, launch at login")
+        @Test("Defaults: idle hide on after 3 s, no shortcut, no menu icon, launch at login")
         func defaults() {
             #expect(Prefs.hideWhenIdle)
             #expect(Prefs.idleDelay == 3)
+            #expect(!Prefs.shortcutEnabled)
+            #expect(!Prefs.showMenuIcon)
             #expect(Prefs.showOnMove)
-            #expect(Prefs.showMenuIcon)
             #expect(LoginItem.enabled)
         }
 
@@ -329,12 +330,13 @@ extension SharedState {
             let dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
                 .appendingPathComponent("../../.build/renders").standardized
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            for ok in [true, false] {
-                let window = SettingsWindow.make(hotKeyOK: ok)
+            for on in [false, true] {
+                Prefs.shortcutEnabled = on
+                let window = SettingsWindow.make()
                 window.appearance = NSAppearance(named: appearance)
                 let tabs = try #require(window.contentViewController as? NSTabViewController)
                 tabs.transitionOptions = []
-                for i in tabs.tabViewItems.indices where ok || i == 1 {
+                for i in tabs.tabViewItems.indices where !on || i == 1 {
                     tabs.selectedTabViewItemIndex = i
                     window.layoutIfNeeded()
                     let view = try #require(window.contentView?.superview)
@@ -342,7 +344,7 @@ extension SharedState {
                     let rep = try #require(view.bitmapImageRepForCachingDisplay(in: view.bounds))
                     view.cacheDisplay(in: view.bounds, to: rep)
                     let png = try #require(rep.representation(using: .png, properties: [:]))
-                    let name = "settings-\(appearance == .aqua ? "light" : "dark")-\(tabs.tabViewItems[i].label)\(ok ? "" : "-nohotkey").png"
+                    let name = "settings-\(appearance == .aqua ? "light" : "dark")-\(tabs.tabViewItems[i].label)\(on ? "-on" : "").png"
                     try png.write(to: dir.appendingPathComponent(name))
                 }
             }

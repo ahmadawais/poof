@@ -13,7 +13,7 @@ enum SettingsWindow {
     static let width: CGFloat = 560
     static let short = (width / 1.618).rounded()
 
-    static func make(hotKeyOK: Bool = true) -> NSWindow {
+    static func make() -> NSWindow {
         let tabs = NSTabViewController()
         tabs.tabStyle = .toolbar
         tabs.canPropagateSelectedChildViewControllerTitle = true
@@ -27,7 +27,7 @@ enum SettingsWindow {
             tabs.addTabViewItem(item)
         }
         add("General", "gearshape", height: short, GeneralTab())
-        add("Shortcut", "keyboard", height: short, ShortcutTab(hotKeyOK: hotKeyOK))
+        add("Shortcut", "keyboard", height: short, ShortcutTab())
         add("Privacy", "hand.raised", height: short, PrivacyTab())
 
         let window = NSWindow(contentViewController: tabs)
@@ -84,7 +84,7 @@ struct GeneralTab: View {
     @AppStorage(K.hideWhenIdle, store: Prefs.d) private var hideWhenIdle = true
     @AppStorage(K.idleDelay, store: Prefs.d) private var idleDelay = 3.0
     @AppStorage(K.launchAtLogin, store: Prefs.d) private var launchAtLogin = true
-    @AppStorage(K.showMenuIcon, store: Prefs.d) private var showIcon = true
+    @AppStorage(K.showMenuIcon, store: Prefs.d) private var showIcon = false
 
     var body: some View {
         Form {
@@ -110,22 +110,26 @@ struct GeneralTab: View {
 }
 
 struct ShortcutTab: View {
-    let hotKeyOK: Bool
+    @AppStorage(K.shortcutEnabled, store: Prefs.d) private var enabled = false
     @AppStorage(K.showOnMove, store: Prefs.d) private var showOnMove = true
 
     var body: some View {
         Form {
             Section {
                 LabeledContent {
-                    KeyCaps(keys: HotKey.display)
+                    HStack(spacing: 12) {
+                        KeyCaps(keys: HotKey.display).opacity(enabled ? 1 : 0.5)
+                        Toggle("Use ⌃⌥K", isOn: $enabled).toggleStyle(.switch).labelsHidden()
+                    }
                 } label: {
                     Text("Hide or show cursor")
-                    if !hotKeyOK { Text("Couldn't register ⌃⌥K. Use the menu bar icon.") }
+                    Text("Suggested shortcut, off by default.")
                 }
                 Toggle(isOn: $showOnMove) {
                     Text("Show when moved")
                     Text("Off: only ⌃⌥K brings the cursor back.")
                 }
+                .disabled(!enabled)
             }
         }
         .formStyle(.grouped)

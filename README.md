@@ -1,14 +1,16 @@
 # Poof
 
 Hide your Mac's cursor. It vanishes after a few seconds of not moving and comes back the moment you touch the
-mouse or trackpad. Or press **⌃⌥K** to make it go *poof* right now.
+mouse or trackpad. Optionally, turn on **⌃⌥K** to make it go *poof* right now.
 
 ## Features
 
 - **Hide when idle**: after 3 s without moving or clicking (1–60 s, slider). Moving or clicking brings it back.
-- **⌃⌥K**: hide now, or show again. *Show when moved* (on by default) lets movement bring it back too; turn it off
-  and only ⌃⌥K does, even through clicks and app switches.
-- Menu bar icon (optional; open Poof from Spotlight to reach Settings when hidden). Launch at login.
+- **⌃⌥K** (suggested, off by default: no global shortcut until you turn it on): hide now, or show again.
+  *Show when moved* (on) lets movement bring it back too; turn it off and only ⌃⌥K does, even through clicks and
+  app switches.
+- No menu bar icon by default (turn it on in Settings). Open Poof from Spotlight to reach Settings; they also open
+  once on first launch. Launch at login.
 
 ## Private by construction
 

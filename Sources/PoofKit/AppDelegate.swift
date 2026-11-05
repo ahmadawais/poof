@@ -22,10 +22,14 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
         controller = Controller(cursor: SystemCursor(), probe: SystemProbe(), now: Self.now)
         controller.onChange = { [weak self] in self?.reschedule() }
         hotKey.action = { [weak self] in self?.controller.toggle(now: Self.now) }
-        hotKey.register()
         installMainMenu()
-        updateStatusItem()
+        applyPrefs()
         reschedule()
+        // No icon and no shortcut by default: show Settings once so a fresh install isn't invisible.
+        if !Prefs.d.bool(forKey: K.welcomed) {
+            Prefs.d.set(true, forKey: K.welcomed)
+            openSettings()
+        }
         NotificationCenter.default.addObserver(self, selector: #selector(defaultsChanged),
                                                name: UserDefaults.didChangeNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(appActivated),
@@ -65,13 +69,20 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
     @objc private func appActivated() { controller.appSwitched() }
 
     @objc private func defaultsChanged() {
-        DispatchQueue.main.async { [weak self] in self?.updateStatusItem() }
+        DispatchQueue.main.async { [weak self] in self?.applyPrefs() }
     }
 
     // MARK: Menu bar
 
-    private let toggleItem = NSMenuItem(title: "Hide Cursor", action: #selector(toggleCursor), keyEquivalent: "k")
+    private let toggleItem = NSMenuItem(title: "Hide Cursor", action: #selector(toggleCursor), keyEquivalent: "")
     private let idleItem = NSMenuItem(title: "Hide When Idle", action: #selector(toggleIdle), keyEquivalent: "")
+
+    private func applyPrefs() {
+        if Prefs.shortcutEnabled != hotKey.isRegistered {
+            if Prefs.shortcutEnabled { hotKey.register() } else { hotKey.unregister() }
+        }
+        updateStatusItem()
+    }
 
     private func updateStatusItem() {
         guard Prefs.showMenuIcon else {
@@ -86,7 +97,6 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
         s.button?.image = image
         let menu = NSMenu()
         menu.delegate = self
-        toggleItem.keyEquivalentModifierMask = [.control, .option]
         toggleItem.target = self
         idleItem.target = self
         menu.addItem(toggleItem)
@@ -101,6 +111,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
 
     public func menuNeedsUpdate(_ menu: NSMenu) {
         toggleItem.title = controller.isHidden ? "Show Cursor" : "Hide Cursor"
+        toggleItem.keyEquivalent = Prefs.shortcutEnabled ? "k" : ""
+        toggleItem.keyEquivalentModifierMask = [.control, .option]
         idleItem.state = Prefs.hideWhenIdle ? .on : .off
     }
 
@@ -110,7 +122,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
 
     private func openSettings() {
         controller.show(now: Self.now)
-        if settingsWindow == nil { settingsWindow = SettingsWindow.make(hotKeyOK: hotKey.isRegistered) }
+        if settingsWindow == nil { settingsWindow = SettingsWindow.make() }
         NSApp.activate()
         settingsWindow?.makeKeyAndOrderFront(nil)
     }
