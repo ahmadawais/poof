@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.png" width="860" alt="Poof: your cursor vanishes when idle. Touch the mouse, it's back."></p>
+
 # Poof
 
 Hide your Mac's cursor. It vanishes after a few seconds of not moving and comes back the moment you touch the
