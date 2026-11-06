@@ -5,8 +5,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 SIGN_ID="${SIGN_ID:--}"
-swift build -c release
-BIN="$(swift build -c release --show-bin-path)/Poof"
+# UNIVERSAL=1: one binary for Apple silicon and Intel (needs full Xcode; release CI uses it).
+ARCH=()
+if [ "${UNIVERSAL:-}" = 1 ]; then ARCH=(--arch arm64 --arch x86_64); fi
+swift build -c release ${ARCH[@]+"${ARCH[@]}"}
+BIN="$(swift build -c release ${ARCH[@]+"${ARCH[@]}"} --show-bin-path)/Poof"
 if [ ! -f Resources/AppIcon.icns ]; then
   swift scripts/make-icon.swift "cursorarrow.slash" && iconutil -c icns Resources/AppIcon.iconset -o Resources/AppIcon.icns
 fi

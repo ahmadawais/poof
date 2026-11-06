@@ -26,7 +26,23 @@ the private `SetsCursorInBackground` property, the same trick other cursor hider
 
 ## Install
 
-Needs macOS 14+ and the Command Line Tools (`xcode-select --install`). No Xcode.
+No Xcode, no Apple Developer account, no certificate: Poof asks for no permissions, so there's no grant to keep
+and an ad-hoc signature made on your Mac is all it needs. Two ways, same result.
+
+**1. Download the release:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ahmadawais/poof/main/scripts/get.sh | bash
+```
+
+[`get.sh`](scripts/get.sh) downloads the latest [release](https://github.com/ahmadawais/poof/releases), checks its
+SHA-256 sums, signs it on your Mac and installs it to `/Applications`. Run it again to update. With the
+[GitHub CLI](https://cli.github.com) signed in it also checks the build provenance: proof the zip was built by
+this repo's [release workflow](.github/workflows/release.yml) from the tagged commit
+(`gh attestation verify Poof.zip --repo ahmadawais/poof`). Prefer reading first? Download `get.sh`, read it,
+then `bash get.sh`.
+
+**2. Build from source** (Command Line Tools: `xcode-select --install`):
 
 ```bash
 git clone https://github.com/ahmadawais/poof.git && cd poof
@@ -34,9 +50,7 @@ git clone https://github.com/ahmadawais/poof.git && cd poof
 ./scripts/test.sh      # Swift Testing suite
 ```
 
-No Apple Developer account or certificate needed: the build is ad-hoc signed on your Mac, and since Poof asks for
-no permissions there is no grant to lose when you rebuild. Built locally, it isn't quarantined, so Gatekeeper
-doesn't block it either. (`SIGN_ID="Developer ID Application: …" ./scripts/build.sh` if you want to sign it.)
+Either way it's never quarantined, so Gatekeeper doesn't block it.
 
 ## License
 

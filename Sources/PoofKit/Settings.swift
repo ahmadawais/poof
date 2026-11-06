@@ -6,6 +6,8 @@ import SwiftUI
 final class Box<T>: ObservableObject {
     @Published var v: T
     init(_ v: T) { self.v = v }
+    // Swift 6.3.3 (Xcode 26.6) crashes inlining into this deinit in -O builds. Nothing to optimize here.
+    @_optimize(none) deinit {}
 }
 
 /// Toolbar-tab preferences window. Golden ratio: 560 × 346 (width ÷ φ).
